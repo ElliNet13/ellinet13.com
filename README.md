@@ -1,2 +1,2 @@
-# ElliNet13's Astro site
-I decided to try astro so this is where my astro code will go.
+# ElliNet13.com
+I wanted a domain and this is the contents of the page.
