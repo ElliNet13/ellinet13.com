@@ -1,5 +1,5 @@
 const CACHE_NAME = 'offline-cache-v1';
-const OFFLINE_PAGE = '/offline.html';
+const OFFLINE_PAGE = '/offline';
 const OFFLINE_FAVICON = '/favicon.ico';
 
 const USERWAY = [
