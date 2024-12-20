@@ -2,19 +2,26 @@ const CACHE_NAME = 'offline-cache-v1';
 const OFFLINE_PAGE = '/offline';
 const OFFLINE_FAVICON = '/favicon.ico';
 
+// Map external URLs to custom cache paths
+const REWRITES = {
+    "https://cdn.userway.org/styles/2024-12-17-16-42-30/widget_lazy.css": "/offline_saves/userway_widget_lazy.css"
+};
+
+// Define the list of files to cache
 const USERWAY = [
     "https://cdn.userway.org/widget.js",
     "https://cdn.userway.org/widgetapp/2024-12-17-16-42-30/widget_app_1734453750984.js",
-    "https://cdn.userway.org/styles/2024-12-17-16-42-30/widget_lazy.css?v=1734453750984",
     "https://cdn.userway.org/widgetapp/images/body_wh.svg",
     "https://cdn.userway.org/widgetapp/images/spin_wh.svg",
     "https://cdn.userway.org/widgetapp/images/check_on.svg"
 ];
 
+// Combine the offline page, favicon, and UserWay assets into one array
 const FILES = [
     OFFLINE_PAGE,
     OFFLINE_FAVICON,
-    ...USERWAY
+    ...USERWAY,
+    ...Object.values(REWRITES) // Include the custom paths for cached files
 ];
 
 self.addEventListener('install', event => {
@@ -50,40 +57,47 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    if (event.request.mode === 'navigate') {
-        event.respondWith(
-            (async () => {
-                try {
-                    const preloadResponse = await event.preloadResponse;
-                    if (preloadResponse) {
-                        return preloadResponse;
-                    }
+    const url = new URL(event.request.url);
 
-                    const networkResponse = await fetch(event.request);
-                    return networkResponse;
-                } catch (error) {
-                    console.log('[Service Worker] Network request failed. Serving offline page.', error);
-                    const cache = await caches.open(CACHE_NAME);
-                    return cache.match(OFFLINE_PAGE);
+    // Check if this request URL has a custom rewrite in REWRITES
+    const rewrittenUrl = REWRITES[url.href];
+
+    if (rewrittenUrl) {
+        // If a rewrite is defined, serve the cached file or fetch and cache it
+        event.respondWith(
+            caches.match(rewrittenUrl).then(cachedResponse => {
+                if (cachedResponse) {
+                    return cachedResponse; // Return cached response if available
                 }
-            })()
+                return fetch(event.request).then(networkResponse => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(rewrittenUrl, networkResponse.clone());
+                        });
+                    }
+                    return networkResponse;
+                });
+            })
         );
     } else {
+        // If no rewrite, handle the request normally
         event.respondWith(
-            (async () => {
-                const url = new URL(event.request.url);
-
-                // Check if the requested pathname is in the FILES array
-                if (FILES.includes(url.pathname)) {
-                    return caches.match(url.pathname) || fetch(event.request);
+            caches.match(event.request).then(cachedResponse => {
+                if (cachedResponse) {
+                    return cachedResponse; // Return cached response if available
                 }
-
-                // Default behavior for other requests
-                return fetch(event.request).catch(() => {
-                    console.log('[Service Worker] Fallback to offline page for failed request.');
+                return fetch(event.request).then(networkResponse => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, networkResponse.clone());
+                        });
+                    }
+                    return networkResponse;
+                }).catch(() => {
+                    // If the network fails, return offline page
                     return caches.match(OFFLINE_PAGE);
                 });
-            })()
+            })
         );
     }
 });
