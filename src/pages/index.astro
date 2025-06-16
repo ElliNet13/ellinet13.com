@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
+import Chat from '../components/Chat.html';
 ---
 
 <Layout title="ElliNet13.com Homepage">
@@ -91,7 +92,7 @@ import Card from '../components/Card.astro';
 				title="EKart"
 				body="Fork of Mario-Kart-3.js but now its EKart."
 			/>
-                        <Card
+            <Card
 				href="https://streams.ellinet13.com/"
 				title="Streams"
 				body="Streams from ElliNet13"
@@ -106,12 +107,12 @@ import Card from '../components/Card.astro';
 				title="Bot lore"
 				body="Here I will show lore from AI bots I talk to!"
 			/>
-<Card
+			<Card
 				href="sendto:ellinet13@ellinet13.com"
 				title="Contact me"
 				body="Send ElliNet13 an email"
 			/>
-<Card
+			<Card
 				href="https://bit.ly/m/ellinet13"
 				title="More links"
 				body="View more links here."
@@ -119,6 +120,7 @@ import Card from '../components/Card.astro';
 		</ul>
 	</main>
 </Layout>
+<Chat/>
 <style>
 	main {
 		margin: auto;
