@@ -5,7 +5,7 @@ interface Props {
 
 const { title } = Astro.props;
 
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 ---
 
 <!doctype html>
@@ -16,10 +16,14 @@ import { Analytics } from '@vercel/analytics/next';
 		<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XFMW8LR39F"></script>
 <script>
+  //@ts-ignore
   window.dataLayer = window.dataLayer || [];
+  //@ts-ignore
   function gtag(){dataLayer.push(arguments);}
+  //@ts-ignore
   gtag('js', new Date());
 
+  //@ts-ignore
   gtag('config', 'G-XFMW8LR39F');
 </script>
 
