@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
-import Chat from '../components/Chat.html';
 ---
 
 <Layout title="ElliNet13.com Homepage">
@@ -38,9 +37,14 @@ import Chat from '../components/Chat.html';
 		<ul role="list" class="link-card-grid">
 
 			<Card
-				href="https://site.ellinet13.com"
-				title="Site"
+				href="./oldsite"
+				title="Old site"
 				body="A site ran by my Raspberry Pi."
+			/>
+			<Card
+				href="https://site.ellinet13.com"
+				title="Old Site"
+				body="The old site but it looks better."
 			/>
 			<Card
 				href="https://bit.ly/ediscordme"
@@ -120,7 +124,6 @@ import Chat from '../components/Chat.html';
 		</ul>
 	</main>
 </Layout>
-<Chat/>
 <style>
 	main {
 		margin: auto;

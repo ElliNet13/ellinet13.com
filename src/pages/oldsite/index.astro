@@ -1,27 +1,72 @@
 ---
 import { parse } from 'node-html-parser';
-import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
+import Layout from '../../layouts/Layout.astro';
+import Card from '../../components/Card.astro';
 
-// Function to fetch and process HTML
-async function fetchData() {
-  const response = await fetch('https://ellinet13.github.io');
+interface Link {
+  href: string;
+  text: string;
+}
+
+// These domains and prefixes will be rewritten to ./proxy/...
+const githubDomain = 'https://ellinet13.github.io';
+const excludedLinks = [
+  'https://bitly.com/pages/products/pages?utm_source=bitly&utm_medium=link-in-bio&utm_campaign=bitly-logo',
+  'https://www.addtoany.com/subscribe',
+];
+
+// Utility to extract the path from an href
+function extractPath(href: string): string | null {
+  try {
+    if (href.startsWith(githubDomain)) {
+      return href.substring(githubDomain.length);
+    }
+    if (href.startsWith('/')) {
+      return href;
+    }
+    if (!href.startsWith('http')) {
+      return '/' + href;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Main fetch and rewrite function
+async function fetchData(): Promise<Link[]> {
+  const response = await fetch(githubDomain);
   const html = await response.text();
   const root = parse(html);
 
-  // Extract all 'a' elements except the specified link
-  const links = root.querySelectorAll('a')
-    .filter(a => a.getAttribute('href') !== 'https://bitly.com/pages/products/pages?utm_source=bitly&utm_medium=link-in-bio&utm_campaign=bitly-logo' && a.getAttribute('href') !== 'https://www.addtoany.com/subscribe')
-    .map(a => ({
-      href: a.getAttribute('href'),
-      text: a.innerText
-    }));
+  const links: Link[] = root.querySelectorAll('a')
+    .filter(a => {
+      const href = a.getAttribute('href');
+      return href && !excludedLinks.includes(href);
+    })
+    .map(a => {
+      const originalHref = a.getAttribute('href')!;
+      const path = extractPath(originalHref);
+      const text = a.innerText || originalHref;
+
+      if (path !== null) {
+        return {
+          href: `./oldsite${path}`,
+          text
+        };
+      }
+
+      return {
+        href: originalHref,
+        text
+      };
+    });
 
   return links;
 }
 
-// Fetch data at build time
-let links = [];
+// Initialize and type correctly
+let links: Link[] = [];
 try {
   links = await fetchData();
 } catch (error) {
@@ -71,6 +116,7 @@ try {
     </ul>
   </main>
 </Layout>
+
 <style>
   main {
     margin: auto;

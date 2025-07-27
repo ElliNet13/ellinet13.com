@@ -6,6 +6,7 @@ interface Props {
 const { title } = Astro.props;
 
 import { Analytics } from '@vercel/analytics/react';
+import Chat from '../components/Chat.html';
 ---
 
 <!doctype html>
@@ -46,6 +47,7 @@ if ('serviceWorker' in navigator) {
 	<body>
 		<slot />
         <Analytics/>
+		<Chat/>
 	</body>
 </html>
 <style is:global>
