@@ -38,7 +38,7 @@
     for (const a of document.querySelectorAll('a[href^="/"]')) {
       const href = a.getAttribute('href');
       if (href && !href.startsWith('//')) {
-        a.setAttribute('href', '/oldsite' + href);
+        a.setAttribute('href', '/oldsite/' + href);
       }
     }
   });
