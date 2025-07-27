@@ -1,50 +1,105 @@
 import type { APIRoute } from 'astro';
 import { load } from 'cheerio';
 
-export const GET: APIRoute = async ({ params }) => {
+const PATCH_SCRIPT_URL = 'https://ellinet13.com/oldsite-patch.js';
+
+const badHeaders = ['content-encoding', 'transfer-encoding', 'content-length', 'connection'];
+
+export const GET: APIRoute = async ({ params, request }) => {
   const path = params.path ? (Array.isArray(params.path) ? params.path.join('/') : params.path) : '';
   const targetUrl = `https://ellinet13.github.io/${path}`;
 
-  const res = await fetch(targetUrl);
-  if (!res.ok) {
-    return new Response('Failed to fetch target', { status: 502 });
-  }
+  const res = await fetch(targetUrl, {
+    method: 'GET',
+    headers: {
+      ...Object.fromEntries(
+        [...request.headers.entries()].filter(([k]) => k.toLowerCase() !== 'host')
+      ),
+    },
+  });
 
-  const headers = new Headers(res.headers);
-  const contentType = headers.get('Content-Type') || '';
+  const contentType = res.headers.get('content-type') || '';
+
+  // Prepare headers to forward, excluding problematic ones
+  const headers: HeadersInit = {};
+  res.headers.forEach((value, key) => {
+    if (!badHeaders.includes(key.toLowerCase())) {
+      headers[key] = value;
+    }
+  });
 
   if (contentType.includes('text/html')) {
-    const html = await res.text();
+    let html = await res.text();
+
     const $ = load(html);
 
-    const customCss = `
-      /* Adding CSS later */
-    `;
-
-    $('head').append(`<style>${customCss}</style>`);
-
-    $('*[href], *[src]').each((_, el) => {
+    // Fix all attribute-based links
+    $('a[href], link[href], script[src], img[src]').each((_, el) => {
       const $el = $(el);
       const attr = $el.attr('href') ? 'href' : 'src';
       const val = $el.attr(attr);
-
       if (!val) return;
 
-      if (val.startsWith('/')) {
-        $el.attr(attr, '/oldsite' + val);
-      } else if (val.startsWith('./')) {
-        // do nothing
-      } else if (!val.startsWith('http') && !val.startsWith('#')) {
-        $el.attr(attr, './' + val);
-      }
+      let newVal = val.replace(/^\/(?!\/)/, '/oldsite/'); // /abc → /oldsite/abc
+      newVal = newVal.replace(/ellinet13\.github\.io/g, 'ellinet13.com/oldsite');
+
+      $el.attr(attr, newVal);
     });
 
-    headers.set('Content-Type', 'text/html');
-    return new Response($.html(), { headers });
-  }
+    // Fix inline scripts
+    $('script:not([src])').each((_, el) => {
+      const $el = $(el);
+      let code = $el.html() || '';
 
-  return new Response(res.body, {
-    status: res.status,
-    headers,
-  });
+      // Save original in a const (not necessary, but requested)
+      const backupVar = '___origAssign' + Math.floor(Math.random() * 10000);
+
+      // Patch window.location and link assignments
+      const patched = `
+const ${backupVar} = window.location;
+window.location = new Proxy(${backupVar}, {
+  set(obj, prop, val) {
+    if (prop === 'href' && typeof val === 'string') {
+      val = val.replace(/^\\//, '/oldsite/').replace('ellinet13.github.io', 'ellinet13.com/oldsite');
+    }
+    obj[prop] = val;
+    return true;
+  }
+});\n` + code.replace(/(['"])(\/[^'"]*)\1/g, (match, q, p1) => `${q}/oldsite${p1.slice(1)}${q}`)
+             .replace(/ellinet13\.github\.io/g, 'ellinet13.com/oldsite');
+
+      $el.html(patched);
+    });
+
+    // Inject patch script LAST
+    $('body').append(`<script src="${PATCH_SCRIPT_URL}"></script>`);
+
+    return new Response($.html(), {
+      status: res.status,
+      headers: {
+        ...headers,
+        'content-type': 'text/html; charset=utf-8',
+      },
+    });
+  } else if (contentType.includes('application/javascript') || path.endsWith('.js')) {
+    let js = await res.text();
+
+    js = js
+      .replace(/^\/(?!\/)/gm, '/oldsite/') // simple root slash fix
+      .replace(/ellinet13\.github\.io/g, 'ellinet13.com/oldsite');
+
+    return new Response(js, {
+      status: res.status,
+      headers: {
+        ...headers,
+        'content-type': 'application/javascript; charset=utf-8',
+      },
+    });
+  } else {
+    // passthrough for other file types
+    return new Response(res.body, {
+      status: res.status,
+      headers,
+    });
+  }
 };
