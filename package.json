@@ -18,5 +18,8 @@
     "node-html-parser": "^6.1.13",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/vercel": "^8.2.3"
   }
 }
