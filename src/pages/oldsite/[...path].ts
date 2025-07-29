@@ -6,22 +6,88 @@ const badHeaders = ['content-encoding', 'transfer-encoding', 'content-length', '
 
 const iframePaths = ['/astro', '/docs', '/replace', '/html'];
 
+const VERCEL_PREFIX = '/_vercel';
+
 export const GET: APIRoute = async ({ params, request }) => {
   const path = params.path
     ? (Array.isArray(params.path) ? '/' + params.path.join('/') : '/' + params.path)
     : '';
+
+  // Bypass .well-known completely (no modification)
+  if (path.startsWith('/.well-known')) {
+    const targetUrl = `https://ellinet13.github.io${path}`;
+    const res = await fetch(targetUrl, {
+      method: 'GET',
+      headers: {
+        ...Object.fromEntries(
+          [...request.headers.entries()].filter(([k]) => k.toLowerCase() !== 'host')
+        ),
+      },
+    });
+
+    const headers: HeadersInit = {};
+    res.headers.forEach((value, key) => {
+      if (!badHeaders.includes(key.toLowerCase())) {
+        headers[key] = value;
+      }
+    });
+
+    return new Response(res.body, {
+      status: res.status,
+      headers,
+    });
+  }
+
+  // Bypass /_vercel full scripts completely (no modification or injection)
+  if (path.startsWith(VERCEL_PREFIX)) {
+    const targetUrl = `https://ellinet13.github.io${path}`;
+    const res = await fetch(targetUrl, {
+      method: 'GET',
+      headers: {
+        ...Object.fromEntries(
+          [...request.headers.entries()].filter(([k]) => k.toLowerCase() !== 'host')
+        ),
+      },
+    });
+
+    const headers: HeadersInit = {};
+    res.headers.forEach((value, key) => {
+      if (!badHeaders.includes(key.toLowerCase())) {
+        headers[key] = value;
+      }
+    });
+
+    return new Response(res.body, {
+      status: res.status,
+      headers,
+    });
+  }
+
   const targetUrl = `https://ellinet13.github.io${path}`;
 
+  // Handle iframe paths
   const shouldIframe = iframePaths.some(base => path === base || path.startsWith(base + '/'));
   if (shouldIframe) {
     // Fetch the target page to extract title
     const res = await fetch(targetUrl);
     let title = 'Framed Content';
+    let iframeContent = '';
     if (res.ok) {
       const html = await res.text();
       const $ = load(html);
       const extractedTitle = $('title').first().text().trim();
       if (extractedTitle) title = extractedTitle;
+
+      // Inject your requested JS scripts into the iframe content
+      // Append the scripts right before </body>
+      $('body').append(`
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+      `);
+
+      iframeContent = $.html();
     }
 
     // Return iframe page with copied title and NO sandbox attribute on iframe
@@ -48,7 +114,7 @@ export const GET: APIRoute = async ({ params, request }) => {
   </style>
 </head>
 <body>
-  <iframe src="https://ellinet13.github.io${path}" allowfullscreen></iframe>
+  <iframe srcdoc="${iframeContent.replace(/"/g, '&quot;')}" allowfullscreen></iframe>
 </body>
 </html>`;
 
@@ -60,7 +126,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   }
 
-  // Proxy logic remains unchanged
+  // Proxy logic for all other requests
   const res = await fetch(targetUrl, {
     method: 'GET',
     headers: {
@@ -78,11 +144,12 @@ export const GET: APIRoute = async ({ params, request }) => {
     }
   });
 
+  // For HTML, rewrite and inject scripts (except paths starting with /_vercel already handled)
   if (contentType.includes('text/html')) {
     let html = await res.text();
     const $ = load(html);
 
-    // Fix all attribute-based links
+    // Fix attribute-based links
     $('a[href], link[href], script[src], img[src]').each((_, el) => {
       const $el = $(el);
       const attr = $el.attr('href') ? 'href' : 'src';
@@ -118,6 +185,14 @@ window.location = new Proxy(${backupVar}, {
     // Inject patch script
     $('body').append(`<script src="${PATCH_SCRIPT_URL}"></script>`);
 
+    // Inject requested VA scripts
+    $('body').append(`
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+    `);
+
     return new Response($.html(), {
       status: res.status,
       headers: {
@@ -125,7 +200,10 @@ window.location = new Proxy(${backupVar}, {
         'content-type': 'text/html; charset=utf-8',
       },
     });
-  } else if (contentType.includes('application/javascript') || path.endsWith('.js')) {
+  }
+
+  // For JavaScript files
+  if (contentType.includes('application/javascript') || path.endsWith('.js')) {
     let js = await res.text();
     js = js
       .replace(/^\/(?!\/)/gm, '/oldsite/')
@@ -138,10 +216,11 @@ window.location = new Proxy(${backupVar}, {
         'content-type': 'application/javascript; charset=utf-8',
       },
     });
-  } else {
-    return new Response(res.body, {
-      status: res.status,
-      headers,
-    });
   }
+
+  // Other content, proxy as-is
+  return new Response(res.body, {
+    status: res.status,
+    headers,
+  });
 };

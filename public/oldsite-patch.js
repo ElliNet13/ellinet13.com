@@ -6,6 +6,12 @@
 
   function fixUrl(url) {
     if (typeof url !== 'string') return url;
+
+    // Bypass URLs starting with /.well-known or /_vercel (do not modify)
+    if (url.startsWith('/.well-known') || url.startsWith('/_vercel')) {
+      return url;
+    }
+
     if (url.startsWith('/') && !url.startsWith('//')) {
       return '/oldsite' + url;
     }
@@ -37,8 +43,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     for (const a of document.querySelectorAll('a[href^="/"]')) {
       const href = a.getAttribute('href');
-      if (href && !href.startsWith('//')) {
-        a.setAttribute('href', '/oldsite/' + href);
+      if (href && !href.startsWith('//') && !href.startsWith('/.well-known') && !href.startsWith('/_vercel')) {
+        a.setAttribute('href', '/oldsite' + href);
       }
     }
   });
