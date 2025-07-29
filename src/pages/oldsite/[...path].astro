@@ -1,9 +1,16 @@
 ---
 const { path } = Astro.params;
-const pathString = Array.isArray(path) ? path.join('/') : '';
+
+// Convert to array if undefined
+const pathParts = Array.isArray(path)
+  ? path
+  : (typeof path === 'string' ? [path] : []);
+
+const pathString = pathParts.join('/');
 const targetUrl = `https://ellinet13.github.io/${pathString}`;
 
-let pageTitle = `Loading: ${pathString}`;
+// Try to fetch the page title from the target
+let pageTitle = `Loading: ${pathString || 'Home'}`;
 
 try {
   const res = await fetch(targetUrl);
