@@ -1,0 +1,43 @@
+---
+const { path } = Astro.params;
+const pathString = Array.isArray(path) ? path.join('/') : '';
+const targetUrl = `https://ellinet13.github.io/${pathString}`;
+
+let pageTitle = `Loading: ${pathString}`;
+
+try {
+  const res = await fetch(targetUrl);
+  const html = await res.text();
+  const match = html.match(/<title>(.*?)<\/title>/i);
+  if (match) {
+    pageTitle = match[1];
+  } else {
+    pageTitle = targetUrl;
+  }
+} catch (err) {
+  pageTitle = `Error loading: ${targetUrl}`;
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{pageTitle}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      iframe {
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe src={targetUrl} allowfullscreen></iframe>
+  </body>
+</html>
