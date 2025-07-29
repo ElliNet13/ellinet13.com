@@ -61,10 +61,5 @@
         a.setAttribute('href', '/oldsite' + href);
       }
     }
-
-    // Remove sandbox from all iframes
-    for (const iframe of document.querySelectorAll('iframe[sandbox]')) {
-      iframe.removeAttribute('sandbox');
-    }
   });
 })();
