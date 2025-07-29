@@ -4,7 +4,6 @@ import { load } from 'cheerio';
 const PATCH_SCRIPT_URL = 'https://ellinet13.com/oldsite-patch.js';
 const badHeaders = ['content-encoding', 'transfer-encoding', 'content-length', 'connection'];
 
-// List of base paths that should return an iframe (including subpaths)
 const iframePaths = ['/astro', '/docs', '/replace', '/html'];
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -13,15 +12,25 @@ export const GET: APIRoute = async ({ params, request }) => {
     : '';
   const targetUrl = `https://ellinet13.github.io${path}`;
 
-  // Check if this path should render as iframe
   const shouldIframe = iframePaths.some(base => path === base || path.startsWith(base + '/'));
   if (shouldIframe) {
+    // Fetch the target page to extract title
+    const res = await fetch(targetUrl);
+    let title = 'Framed Content';
+    if (res.ok) {
+      const html = await res.text();
+      const $ = load(html);
+      const extractedTitle = $('title').first().text().trim();
+      if (extractedTitle) title = extractedTitle;
+    }
+
+    // Return iframe page with copied title and NO sandbox attribute on iframe
     const iframeHTML = `
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Framed Content</title>
+  <meta charset="UTF-8" />
+  <title>${title}</title>
   <style>
     html, body, iframe {
       margin: 0;
@@ -42,6 +51,7 @@ export const GET: APIRoute = async ({ params, request }) => {
   <iframe src="https://ellinet13.github.io${path}" allowfullscreen></iframe>
 </body>
 </html>`;
+
     return new Response(iframeHTML, {
       status: 200,
       headers: {
@@ -50,7 +60,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   }
 
-  // Proxy logic
+  // Proxy logic remains unchanged
   const res = await fetch(targetUrl, {
     method: 'GET',
     headers: {
