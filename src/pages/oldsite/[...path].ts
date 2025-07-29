@@ -4,28 +4,17 @@ import { load } from 'cheerio';
 const PATCH_SCRIPT_URL = 'https://ellinet13.com/oldsite-patch.js';
 const badHeaders = ['content-encoding', 'transfer-encoding', 'content-length', 'connection'];
 
-// List of wildcard patterns (supports *)
-const iframeRules = [
-  'astro/*',
-  'docs/*',
-  'replace/*',
-  'html*',
-];
-
-// Match wildcard pattern like "games/*"
-function matchesWildcard(path: string, pattern: string): boolean {
-  const regex = new RegExp(
-    '^' + pattern.split('*').map(part => part.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&')).join('.*') + '$'
-  );
-  return regex.test(path);
-}
+// List of base paths that should return an iframe (including subpaths)
+const iframePaths = ['/astro', '/docs', '/replace', '/html'];
 
 export const GET: APIRoute = async ({ params, request }) => {
-  const path = params.path ? (Array.isArray(params.path) ? params.path.join('/') : params.path) : '';
-  const targetUrl = `https://ellinet13.github.io/${path}`;
+  const path = params.path
+    ? (Array.isArray(params.path) ? '/' + params.path.join('/') : '/' + params.path)
+    : '';
+  const targetUrl = `https://ellinet13.github.io${path}`;
 
-  // Check for iframe match
-  const shouldIframe = iframeRules.some(pattern => matchesWildcard(path, pattern));
+  // Check if this path should render as iframe
+  const shouldIframe = iframePaths.some(base => path === base || path.startsWith(base + '/'));
   if (shouldIframe) {
     const iframeHTML = `
 <!DOCTYPE html>
@@ -50,7 +39,7 @@ export const GET: APIRoute = async ({ params, request }) => {
   </style>
 </head>
 <body>
-  <iframe src="https://ellinet13.github.io/${path}" allowfullscreen></iframe>
+  <iframe src="https://ellinet13.github.io${path}" allowfullscreen></iframe>
 </body>
 </html>`;
     return new Response(iframeHTML, {
@@ -61,7 +50,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   }
 
-  // Normal proxy behavior
+  // Proxy logic
   const res = await fetch(targetUrl, {
     method: 'GET',
     headers: {
@@ -83,6 +72,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     let html = await res.text();
     const $ = load(html);
 
+    // Fix all attribute-based links
     $('a[href], link[href], script[src], img[src]').each((_, el) => {
       const $el = $(el);
       const attr = $el.attr('href') ? 'href' : 'src';
@@ -94,6 +84,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       $el.attr(attr, newVal);
     });
 
+    // Fix inline scripts
     $('script:not([src])').each((_, el) => {
       const $el = $(el);
       let code = $el.html() || '';
@@ -108,11 +99,13 @@ window.location = new Proxy(${backupVar}, {
     obj[prop] = val;
     return true;
   }
-});\n` + code.replace(/(['"])(\/[^'"]*)\1/g, (match, q, p1) => `${q}/oldsite${p1.slice(1)}${q}`)
-             .replace(/ellinet13\.github\.io/g, 'ellinet13.com/oldsite');
+});\n` + code
+        .replace(/(['"])(\/[^'"]*)\1/g, (match, q, p1) => `${q}/oldsite${p1.slice(1)}${q}`)
+        .replace(/ellinet13\.github\.io/g, 'ellinet13.com/oldsite');
       $el.html(patched);
     });
 
+    // Inject patch script
     $('body').append(`<script src="${PATCH_SCRIPT_URL}"></script>`);
 
     return new Response($.html(), {
