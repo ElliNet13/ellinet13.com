@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { load } from 'cheerio';
 
-const PATCH_SCRIPT_URL = 'https://ellinet13.com/oldsite-patch.js';
+const PATCH_SCRIPT_URL = 'https://www.ellinet13.com/oldsite-patch.js';
 const badHeaders = ['content-encoding', 'transfer-encoding', 'content-length', 'connection'];
 
 const iframePaths = ['/astro', '/docs', '/replace', '/html'];
