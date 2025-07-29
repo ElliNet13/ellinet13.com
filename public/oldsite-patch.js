@@ -1,4 +1,30 @@
 (() => {
+  // --- Vercel Analytics Injection (do not alter /_vercel) ---
+  if (!location.pathname.startsWith("/_vercel")) {
+    const va1 = document.createElement("script");
+    va1.textContent = `window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };`;
+    document.head.appendChild(va1);
+
+    const va2 = document.createElement("script");
+    va2.defer = true;
+    va2.src = "/_vercel/insights/script.js";
+    document.head.appendChild(va2);
+  }
+
+  // --- Remove all sandbox attributes from iframes ---
+  new MutationObserver(() => {
+    document.querySelectorAll("iframe[sandbox]").forEach(iframe => {
+      iframe.removeAttribute("sandbox");
+    });
+  }).observe(document, { childList: true, subtree: true });
+
+  // --- Patch document.getElementById to re-query every time ---
+  const realGetElementById = Document.prototype.getElementById;
+  Document.prototype.getElementById = function(id) {
+    return realGetElementById.call(this, id);
+  };
+
+  // --- Proxy/Bypass Rewriting ---
   const originalFetch = window.fetch;
   const originalXhrOpen = XMLHttpRequest.prototype.open;
   const originalAssign = window.location.assign;
@@ -6,12 +32,6 @@
 
   function fixUrl(url) {
     if (typeof url !== 'string') return url;
-
-    // Bypass URLs starting with /.well-known or /_vercel (do not modify)
-    if (url.startsWith('/.well-known') || url.startsWith('/_vercel')) {
-      return url;
-    }
-
     if (url.startsWith('/') && !url.startsWith('//')) {
       return '/oldsite' + url;
     }
@@ -43,8 +63,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     for (const a of document.querySelectorAll('a[href^="/"]')) {
       const href = a.getAttribute('href');
-      if (href && !href.startsWith('//') && !href.startsWith('/.well-known') && !href.startsWith('/_vercel')) {
-        a.setAttribute('href', '/oldsite' + href);
+      if (href && !href.startsWith('//')) {
+        a.setAttribute('href', '/oldsite/' + href);
       }
     }
   });
