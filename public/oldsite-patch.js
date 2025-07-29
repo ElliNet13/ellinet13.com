@@ -1,41 +1,29 @@
 (() => {
-  // --- Vercel Analytics Injection (do not alter /_vercel) ---
-  if (!location.pathname.startsWith("/_vercel")) {
-    const va1 = document.createElement("script");
-    va1.textContent = `window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };`;
-    document.head.appendChild(va1);
-
-    const va2 = document.createElement("script");
-    va2.defer = true;
-    va2.src = "/_vercel/insights/script.js";
-    document.head.appendChild(va2);
-  }
-
-  // --- Remove all sandbox attributes from iframes ---
-  new MutationObserver(() => {
-    document.querySelectorAll("iframe[sandbox]").forEach(iframe => {
-      iframe.removeAttribute("sandbox");
-    });
-  }).observe(document, { childList: true, subtree: true });
-
-  // --- Patch document.getElementById to re-query every time ---
-  const realGetElementById = Document.prototype.getElementById;
-  Document.prototype.getElementById = function(id) {
-    return realGetElementById.call(this, id);
-  };
-
-  // --- Proxy/Bypass Rewriting ---
   const originalFetch = window.fetch;
   const originalXhrOpen = XMLHttpRequest.prototype.open;
   const originalAssign = window.location.assign;
   const originalReplace = window.location.replace;
+  const originalGetElementById = Document.prototype.getElementById;
 
   function fixUrl(url) {
     if (typeof url !== 'string') return url;
+
+    // If it's an absolute GitHub Pages URL, redirect to /oldsite
+    if (/https?:\/\/ellinet13\.github\.io/gi.test(url)) {
+      return url.replace(/https?:\/\/ellinet13\.github\.io/gi, 'https://ellinet13.com/oldsite');
+    }
+
+    // Skip special folders like /_vercel, /api, /assets, etc.
+    if (url.startsWith('/_vercel') || url.startsWith('/api') || url.startsWith('/assets')) {
+      return url;
+    }
+
+    // Prepend /oldsite to local root-relative links
     if (url.startsWith('/') && !url.startsWith('//')) {
       return '/oldsite' + url;
     }
-    return url.replace(/https?:\/\/ellinet13\.github\.io/gi, 'https://ellinet13.com/oldsite');
+
+    return url;
   }
 
   window.fetch = function (input, init) {
@@ -60,12 +48,23 @@
     originalReplace.call(this, fixUrl(url));
   };
 
+  // Patch getElementById to always return an up-to-date element by id
+  Document.prototype.getElementById = function(id) {
+    return this.querySelector(`[id="${id}"]`);
+  };
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Fix all <a href="/..."> links
     for (const a of document.querySelectorAll('a[href^="/"]')) {
       const href = a.getAttribute('href');
-      if (href && !href.startsWith('//')) {
-        a.setAttribute('href', '/oldsite/' + href);
+      if (href && !href.startsWith('//') && !href.startsWith('/_vercel') && !href.startsWith('/api')) {
+        a.setAttribute('href', '/oldsite' + href);
       }
+    }
+
+    // Remove sandbox from all iframes
+    for (const iframe of document.querySelectorAll('iframe[sandbox]')) {
+      iframe.removeAttribute('sandbox');
     }
   });
 })();
