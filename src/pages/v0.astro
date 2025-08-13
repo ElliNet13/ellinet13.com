@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const systemPromptUrl =
+  'https://raw.githubusercontent.com/elder-plinius/CL4R1T4S/refs/heads/main/VERCEL%20V0/Vercel_v0.txt';
+
+// ✅ Server-side fetch (Astro always runs this at build or SSR time)
+let systemPrompt = '';
+try {
+  const res = await fetch(systemPromptUrl);
+  if (res.ok) {
+    systemPrompt = await res.text();
+  } else {
+    console.error(`Failed to fetch system prompt: ${res.status}`);
+  }
+} catch (err) {
+  console.error('Error fetching system prompt:', err);
+}
+
+// Escape backticks for safe JS embedding
+const escapedSystemPrompt = systemPrompt.replace(/`/g, '\\`');
+---
+
+<Layout title="Vercel v0 AI Chat">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vercel v0 AI Chat</title>
+    <script src="https://js.puter.com/v2/" defer></script>
+    <style>
+      body {
+        margin: 0;
+        background-color: #0a0a0a;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        padding: 1rem 2rem;
+        background-color: #161616;
+        font-weight: 600;
+        font-size: 1.5rem;
+        border-bottom: 1px solid #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header button {
+        background: #1f1f1f;
+        border: 1px solid #333;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+      header button:hover {
+        background: #333;
+      }
+      main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 2rem;
+      }
+      #puter-chat-container {
+        flex-grow: 1;
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span>Vercel v0 AI Chat</span>
+      <div>
+        <button id="login-btn">Login</button>
+        <button id="logout-btn" style="display: none;">Sign Out</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="puter-chat-container"></div>
+    </main>
+
+    <script type="module">
+      const systemPrompt = `\`${escapedSystemPrompt}\``;
+
+      const initChat = () => {
+        window.Puter({
+          container: '#puter-chat-container',
+          model: 'vercel-v0',
+          systemPrompt,
+          theme: 'dark',
+          placeholder: 'Ask me anything...',
+          onReady: () => {
+            console.log('Puter AI chat ready!');
+          }
+        });
+      };
+
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      const updateAuthUI = async () => {
+        const user = await window.puter.auth.getUser();
+        if (user) {
+          loginBtn.style.display = 'none';
+          logoutBtn.style.display = 'inline-block';
+        } else {
+          loginBtn.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+        }
+      };
+
+      loginBtn.addEventListener('click', async () => {
+        await window.puter.auth.signIn();
+        await updateAuthUI();
+        initChat();
+      });
+
+      logoutBtn.addEventListener('click', async () => {
+        await window.puter.auth.signOut();
+        await updateAuthUI();
+        document.getElementById('puter-chat-container').innerHTML = '';
+      });
+
+      const waitForPuter = () => {
+        if (!window.puter) return setTimeout(waitForPuter, 100);
+        updateAuthUI();
+        initChat();
+      };
+
+      waitForPuter();
+    </script>
+  </body>
+</Layout>
