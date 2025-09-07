@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
 
 type Notification = {
+  id: string;
   title: string;
-  body: string;
-  timestamp: string;
+  message: string;
+  createdAt: string;
 };
 
 export default function NotificationBell() {
@@ -24,9 +25,10 @@ export default function NotificationBell() {
         );
         const data = await res.json();
         const normalized: Notification[] = data.map((n: any) => ({
+          id: n.id,
           title: n.title ?? "",
-          body: n.body ?? "",
-          timestamp: n.timestamp ?? n.createdAt ?? new Date().toISOString(),
+          message: n.message ?? "",
+          createdAt: n.createdAt ?? new Date().toISOString(),
         }));
         setNotifications(normalized);
       } catch (err) {
@@ -44,17 +46,17 @@ export default function NotificationBell() {
     );
 
     const handleMessage = (event: MessageEvent) => {
-      // Ignore empty or ping messages
-      if (!event.data || event.data.trim().startsWith(":")) return;
+      if (!event.data || event.data.trim().startsWith(":")) return; // ignore keepalive pings
 
       try {
         const data = JSON.parse(event.data);
-        if (!data.title || !data.body) return;
+        if (!data.id || !data.title || !data.message) return;
 
         const newNotif: Notification = {
+          id: data.id,
           title: data.title,
-          body: data.body,
-          timestamp: data.timestamp ?? new Date().toISOString(),
+          message: data.message,
+          createdAt: data.createdAt ?? new Date().toISOString(),
         };
 
         // Add to history
@@ -62,20 +64,13 @@ export default function NotificationBell() {
 
         // Add live popup
         setLivePopups((prev) => {
-          const exists = prev.find(
-            (n) => n.timestamp === newNotif.timestamp && n.title === newNotif.title
-          );
-          if (exists) return prev;
-
-          setTimeout(() => {
-            setLivePopups((prev) =>
-              prev.filter(
-                (n) => !(n.timestamp === newNotif.timestamp && n.title === newNotif.title)
-              )
-            );
-          }, 5000);
-
-          return [...prev, newNotif];
+          if (!prev.find((n) => n.id === newNotif.id)) {
+            setTimeout(() => {
+              setLivePopups((prev) => prev.filter((n) => n.id !== newNotif.id));
+            }, 5000);
+            return [...prev, newNotif];
+          }
+          return prev;
         });
       } catch (e) {
         console.error("Invalid SSE data:", event.data);
@@ -133,9 +128,9 @@ export default function NotificationBell() {
               </div>
             ) : (
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {notifications.map((n, i) => (
+                {notifications.map((n) => (
                   <li
-                    key={`${n.timestamp}-${i}`}
+                    key={n.id}
                     style={{
                       borderBottom: "1px solid #333",
                       padding: "0.5rem 0",
@@ -145,10 +140,10 @@ export default function NotificationBell() {
                       {n.title}
                     </div>
                     <div style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                      {n.body}
+                      {n.message}
                     </div>
                     <div style={{ fontSize: "0.75rem", color: "#aaa" }}>
-                      {new Date(n.timestamp).toLocaleString()}
+                      {new Date(n.createdAt).toLocaleString()}
                     </div>
                   </li>
                 ))}
@@ -172,7 +167,7 @@ export default function NotificationBell() {
       >
         {livePopups.map((notif) => (
           <div
-            key={`${notif.timestamp}-${notif.title}`}
+            key={notif.id}
             style={{
               backgroundColor: "#1e1e1e",
               color: "white",
@@ -192,21 +187,17 @@ export default function NotificationBell() {
                 {notif.title}
               </div>
               <div style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                {notif.body}
+                {notif.message}
               </div>
               <div style={{ fontSize: "0.75rem", color: "#aaa" }}>
-                {new Date(notif.timestamp).toLocaleTimeString()}
+                {new Date(notif.createdAt).toLocaleTimeString()}
               </div>
             </div>
             <X
               size={16}
               style={{ cursor: "pointer", marginLeft: "0.5rem" }}
               onClick={() =>
-                setLivePopups((prev) =>
-                  prev.filter(
-                    (n) => !(n.timestamp === notif.timestamp && n.title === notif.title)
-                  )
-                )
+                setLivePopups((prev) => prev.filter((n) => n.id !== notif.id))
               }
             />
           </div>
