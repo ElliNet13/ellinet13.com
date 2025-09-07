@@ -13,8 +13,10 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [livePopups, setLivePopups] = useState<Notification[]>([]);
 
-  // Load history from backend
+  // Load history whenever popout opens
   useEffect(() => {
+    if (!showNotifications) return;
+
     async function fetchHistory() {
       try {
         const res = await fetch(
@@ -23,7 +25,7 @@ export default function NotificationBell() {
         const data = await res.json();
         const normalized: Notification[] = data.map((n: any) => ({
           title: n.title ?? "",
-          body: n.body ?? `${n.title ?? ""}: ${n.body ?? ""}`,
+          body: n.body ?? "", // fixed colon issue
           timestamp: n.timestamp ?? n.createdAt ?? new Date().toISOString(),
         }));
         setNotifications(normalized);
@@ -31,8 +33,9 @@ export default function NotificationBell() {
         console.error("Failed to load notifications history:", err);
       }
     }
+
     fetchHistory();
-  }, []);
+  }, [showNotifications]);
 
   // SSE for real-time notifications
   useEffect(() => {
@@ -50,16 +53,20 @@ export default function NotificationBell() {
             timestamp: data.timestamp ?? new Date().toISOString(),
           };
 
-          // Add to history at top
           setNotifications((prev) => [newNotif, ...prev]);
 
-          // Add to live popups
-          setLivePopups((prev) => [...prev, newNotif]);
-          setTimeout(() => {
-            setLivePopups((prev) =>
-              prev.filter((n) => n.timestamp !== newNotif.timestamp)
-            );
-          }, 5000);
+          // Only add popup if it's not already there
+          setLivePopups((prev) => {
+            if (!prev.find((n) => n.timestamp === newNotif.timestamp)) {
+              setTimeout(() => {
+                setLivePopups((prev) =>
+                  prev.filter((n) => n.timestamp !== newNotif.timestamp)
+                );
+              }, 5000);
+              return [...prev, newNotif];
+            }
+            return prev;
+          });
         }
       } catch (e) {
         console.error("Invalid SSE data:", event.data);
@@ -76,7 +83,6 @@ export default function NotificationBell() {
 
   return (
     <>
-      {/* Notification Bell */}
       <div style={{ position: "relative" }}>
         <Bell
           size={24}
@@ -138,7 +144,6 @@ export default function NotificationBell() {
         )}
       </div>
 
-      {/* Live pop-up notifications */}
       <div
         style={{
           position: "fixed",
