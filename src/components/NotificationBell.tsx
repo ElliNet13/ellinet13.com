@@ -25,7 +25,7 @@ export default function NotificationBell() {
         const data = await res.json();
         const normalized: Notification[] = data.map((n: any) => ({
           title: n.title ?? "",
-          body: n.body ?? "", // fixed colon issue
+          body: n.body ?? "",
           timestamp: n.timestamp ?? n.createdAt ?? new Date().toISOString(),
         }));
         setNotifications(normalized);
@@ -43,42 +43,56 @@ export default function NotificationBell() {
       "https://backend.ellinet13.com/api/notifications/stream"
     );
 
-    evtSource.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
+      // Ignore empty or ping messages
+      if (!event.data || event.data.trim().startsWith(":")) return;
+
       try {
         const data = JSON.parse(event.data);
-        if (data.title && data.body) {
-          const newNotif: Notification = {
-            title: data.title,
-            body: data.body,
-            timestamp: data.timestamp ?? new Date().toISOString(),
-          };
+        if (!data.title || !data.body) return;
 
-          setNotifications((prev) => [newNotif, ...prev]);
+        const newNotif: Notification = {
+          title: data.title,
+          body: data.body,
+          timestamp: data.timestamp ?? new Date().toISOString(),
+        };
 
-          // Only add popup if it's not already there
-          setLivePopups((prev) => {
-            if (!prev.find((n) => n.timestamp === newNotif.timestamp)) {
-              setTimeout(() => {
-                setLivePopups((prev) =>
-                  prev.filter((n) => n.timestamp !== newNotif.timestamp)
-                );
-              }, 5000);
-              return [...prev, newNotif];
-            }
-            return prev;
-          });
-        }
+        // Add to history
+        setNotifications((prev) => [newNotif, ...prev]);
+
+        // Add live popup
+        setLivePopups((prev) => {
+          const exists = prev.find(
+            (n) => n.timestamp === newNotif.timestamp && n.title === newNotif.title
+          );
+          if (exists) return prev;
+
+          setTimeout(() => {
+            setLivePopups((prev) =>
+              prev.filter(
+                (n) => !(n.timestamp === newNotif.timestamp && n.title === newNotif.title)
+              )
+            );
+          }, 5000);
+
+          return [...prev, newNotif];
+        });
       } catch (e) {
         console.error("Invalid SSE data:", event.data);
       }
     };
+
+    evtSource.addEventListener("message", handleMessage);
 
     evtSource.onerror = (err) => {
       console.error("SSE connection error:", err);
       evtSource.close();
     };
 
-    return () => evtSource.close();
+    return () => {
+      evtSource.removeEventListener("message", handleMessage);
+      evtSource.close();
+    };
   }, []);
 
   return (
@@ -144,6 +158,7 @@ export default function NotificationBell() {
         )}
       </div>
 
+      {/* Live popups */}
       <div
         style={{
           position: "fixed",
@@ -157,7 +172,7 @@ export default function NotificationBell() {
       >
         {livePopups.map((notif) => (
           <div
-            key={notif.timestamp}
+            key={`${notif.timestamp}-${notif.title}`}
             style={{
               backgroundColor: "#1e1e1e",
               color: "white",
@@ -188,7 +203,9 @@ export default function NotificationBell() {
               style={{ cursor: "pointer", marginLeft: "0.5rem" }}
               onClick={() =>
                 setLivePopups((prev) =>
-                  prev.filter((n) => n.timestamp !== notif.timestamp)
+                  prev.filter(
+                    (n) => !(n.timestamp === notif.timestamp && n.title === notif.title)
+                  )
                 )
               }
             />
