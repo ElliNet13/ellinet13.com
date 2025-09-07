@@ -5,8 +5,7 @@ import '../styles/global.css'
 import { Image } from 'astro:assets';
 // @ts-ignore
 import ElliNet13Logo from '../assets/ElliNet13.png';
-
-import { Bell } from 'lucide-react';
+import NotificationBell from './NotificationBell.jsx';
 ---
 
 <style>
@@ -23,14 +22,12 @@ import { Bell } from 'lucide-react';
     box-sizing: border-box;
   }
 
-  /* Dark mode: border slightly lighter than background */
   @media (prefers-color-scheme: dark) {
     .top-bar {
       border-color: #4d4d4d;
     }
   }
 
-  /* Light mode: border slightly darker than background */
   @media (prefers-color-scheme: light) {
     .top-bar {
       background-color: #e0e0e0;
@@ -38,36 +35,10 @@ import { Bell } from 'lucide-react';
       border-color: #c0c0c0;
     }
   }
-
-  .top-bar h1 {
-    margin: 0;
-    font-size: 1.25rem;
-    padding: 0 1rem;
-  }
-
-  .top-bar nav {
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-  }
-
-  .top-bar nav a {
-    color: inherit; /* adapts to light/dark mode */
-    margin-left: 1rem;
-    text-decoration: none;
-    font-weight: bold;
-  }
-
-  .top-bar nav a:hover {
-    text-decoration: underline;
-  }
 </style>
 
-<!-- @ts-ignore -->
-<div class="top-bar flex items-center p-2 bg-gray-800 text-white">
-    <!-- @ts-ignore -->
+<div class="top-bar flex items-center p-2">
   <nav class="flex items-center w-full">
-    <!-- Logo on the left -->
     <Image
       src={ElliNet13Logo}
       alt="ElliNet13 Logo"
@@ -77,11 +48,9 @@ import { Bell } from 'lucide-react';
       format="webp"
     />
 
-    <!-- Spacer pushes the bell to the right -->
-     <!-- @ts-ignore -->
-    <div class="ml-auto">
+    <!-- Bell with popout -->
+    <div class="ml-auto bell-container">
       <!-- @ts-ignore -->
-      <Bell size={24} class="text-white hover:text-blue-400 cursor-pointer" />
-    </div>
+      <NotificationBell client:load />
   </nav>
 </div>
