@@ -14,9 +14,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.5.1
         version: 3.5.1
-      '@types/react':
-        specifier: ^19.1.8
-        version: 19.1.8
+      '@fluentui/svg-icons':
+        specifier: ^1.1.309
+        version: 1.1.309
       '@types/react-dom':
         specifier: ^19.1.6
         version: 19.1.6(@types/react@19.1.8)
@@ -42,6 +42,9 @@ importers:
       '@astrojs/vercel':
         specifier: ^8.2.7
         version: 8.2.7(astro@5.13.5(@types/node@24.0.3)(rollup@4.43.0)(typescript@5.8.3))(react@19.1.0)(rollup@4.43.0)
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.1.8
 
 packages:
 
@@ -330,6 +333,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fluentui/svg-icons@1.1.309':
+    resolution: {integrity: sha512-EUhG4jOw7/r0mUm/SJTeWqz1SL2iSXPe1laoE5h+buNpcPNC6c8jLF1GywU5i3Scf8YYialPDRZCFeEDpvAvhQ==}
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -2330,6 +2336,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.5':
     optional: true
+
+  '@fluentui/svg-icons@1.1.309': {}
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:

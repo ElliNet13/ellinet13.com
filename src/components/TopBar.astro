@@ -1,0 +1,75 @@
+---
+// @ts-ignore
+import { Image } from 'astro:assets';
+// @ts-ignore
+import ElliNet13Logo from '../assets/ElliNet13.png';
+
+---
+
+<style>
+  .top-bar {
+    width: 100%;
+    height: 50px;
+    background-color: #2b2b2b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    border: 1px solid; /* color set below based on mode */
+    box-sizing: border-box;
+  }
+
+  /* Dark mode: border slightly lighter than background */
+  @media (prefers-color-scheme: dark) {
+    .top-bar {
+      border-color: #4d4d4d;
+    }
+  }
+
+  /* Light mode: border slightly darker than background */
+  @media (prefers-color-scheme: light) {
+    .top-bar {
+      background-color: #e0e0e0;
+      color: black;
+      border-color: #c0c0c0;
+    }
+  }
+
+  .top-bar h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    padding: 0 1rem;
+  }
+
+  .top-bar nav {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+  }
+
+  .top-bar nav a {
+    color: inherit; /* adapts to light/dark mode */
+    margin-left: 1rem;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .top-bar nav a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<!-- @ts-ignore -->
+<div class="top-bar">
+  <nav>
+    <Image
+      src={ElliNet13Logo}
+      alt="ElliNet13 Logo"
+      width={40}
+      height={40}
+      quality={80}
+      format="webp"
+    />
+    </nav>
+</div>

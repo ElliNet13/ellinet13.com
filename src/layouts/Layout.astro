@@ -1,12 +1,21 @@
 ---
-interface Props {
-	title: string;
+export interface Props {
+
+title: string;
+
+}
+
+export interface Props {
+
+title: string;
+
 }
 
 const { title } = Astro.props;
 
 import { Analytics } from '@vercel/analytics/react';
 import Chat from '../components/Chat.astro';
+import TopBar from '../components/TopBar.astro';
 ---
 
 <!doctype html>
@@ -48,6 +57,7 @@ import Chat from '../components/Chat.astro';
 		<title>{title}</title>
 	</head>
 	<body>
+		<TopBar />
 		<slot />
         <Analytics/>
 		<Chat/>
