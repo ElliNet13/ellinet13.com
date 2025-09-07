@@ -1,10 +1,5 @@
 ---
 import '../styles/global.css'
-
-// @ts-ignore
-import { Image } from 'astro:assets';
-// @ts-ignore
-import ElliNet13Logo from '../assets/ElliNet13Logo.png';
 import NotificationBell from './NotificationBell.jsx';
 ---
 
@@ -39,14 +34,7 @@ import NotificationBell from './NotificationBell.jsx';
 
 <div class="top-bar flex items-center p-2">
   <nav class="flex items-center w-full">
-    <Image
-      src={ElliNet13Logo}
-      alt="ElliNet13 Logo"
-      width={40}
-      height={40}
-      quality={80}
-      format="webp"
-    />
+    <img src="/logo.png" alt="Logo" class="h-40 w-40 mr-4" />
 
     <!-- Bell with popout -->
     <div class="ml-auto bell-container">
