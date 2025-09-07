@@ -12,11 +12,11 @@
   "dependencies": {
     "@astrojs/react": "^4.3.0",
     "@astrojs/sitemap": "^3.5.1",
-    "@fluentui/svg-icons": "^1.1.309",
     "@types/react-dom": "^19.1.6",
     "@vercel/analytics": "^1.5.0",
     "astro": "^5.13.5",
     "cheerio": "^1.1.2",
+    "lucide-react": "^0.542.0",
     "node-html-parser": "^6.1.13",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
