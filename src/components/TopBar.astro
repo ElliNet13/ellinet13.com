@@ -1,9 +1,12 @@
 ---
+import '../styles/global.css'
+
 // @ts-ignore
 import { Image } from 'astro:assets';
 // @ts-ignore
 import ElliNet13Logo from '../assets/ElliNet13.png';
 
+import { Bell } from 'lucide-react';
 ---
 
 <style>
@@ -61,8 +64,10 @@ import ElliNet13Logo from '../assets/ElliNet13.png';
 </style>
 
 <!-- @ts-ignore -->
-<div class="top-bar">
-  <nav>
+<div class="top-bar flex items-center p-2 bg-gray-800 text-white">
+    <!-- @ts-ignore -->
+  <nav class="flex items-center w-full">
+    <!-- Logo on the left -->
     <Image
       src={ElliNet13Logo}
       alt="ElliNet13 Logo"
@@ -71,5 +76,12 @@ import ElliNet13Logo from '../assets/ElliNet13.png';
       quality={80}
       format="webp"
     />
-    </nav>
+
+    <!-- Spacer pushes the bell to the right -->
+     <!-- @ts-ignore -->
+    <div class="ml-auto">
+      <!-- @ts-ignore -->
+      <Bell size={24} class="text-white hover:text-blue-400 cursor-pointer" />
+    </div>
+  </nav>
 </div>

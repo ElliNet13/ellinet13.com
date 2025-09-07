@@ -4,6 +4,8 @@ import vercel from '@astrojs/vercel';
 import sitemap from '@astrojs/sitemap';
 import path from 'path';
 
+import tailwindcss from '@tailwindcss/vite';
+
 export default defineConfig({
   site: 'https://ellinet13.com',
   output: 'server',       // Enable SSR build
@@ -15,5 +17,7 @@ export default defineConfig({
         '@': path.resolve('./src'),
       },
     },
+
+    plugins: [tailwindcss()],
   },
 });
