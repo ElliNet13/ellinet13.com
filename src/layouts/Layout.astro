@@ -58,7 +58,7 @@ import TopBar from '../components/TopBar.astro';
 	</head>
 	<body>
 		<TopBar />
-		{Astro.slots.default()}
+		<slot />
         <Analytics/>
 		<Chat/>
 	</body>
