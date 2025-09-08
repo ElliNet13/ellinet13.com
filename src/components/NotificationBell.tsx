@@ -1,33 +1,23 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
 
 type Notification = {
+  id: string;
   title: string;
-  body: string;
-  timestamp: string;
+  message: string;
+  createdAt: string;
 };
 
 export default function NotificationBell() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [livePopups, setLivePopups] = useState<Notification[]>([]);
-  const [permission, setPermission] = useState(Notification.permission);
 
-  // Request browser notification permission
-  function requestPermission() {
-    if ("Notification" in window) {
-      Notification.requestPermission().then((perm) => {
-        setPermission(perm);
-      });
-    } else {
-      alert("This browser does not support notifications.");
-    }
-  }
-
-  // Load history from backend
+  // Load history whenever popout opens
   useEffect(() => {
+    if (!showNotifications) return;
+
     async function fetchHistory() {
       try {
         const res = await fetch(
@@ -35,17 +25,19 @@ export default function NotificationBell() {
         );
         const data = await res.json();
         const normalized: Notification[] = data.map((n: any) => ({
+          id: n.id,
           title: n.title ?? "",
-          body: n.body ?? `${n.title ?? ""}: ${n.body ?? ""}`,
-          timestamp: n.timestamp ?? n.createdAt ?? new Date().toISOString(),
+          message: n.message ?? "",
+          createdAt: n.createdAt ?? new Date().toISOString(),
         }));
         setNotifications(normalized);
       } catch (err) {
         console.error("Failed to load notifications history:", err);
       }
     }
+
     fetchHistory();
-  }, []);
+  }, [showNotifications]);
 
   // SSE for real-time notifications
   useEffect(() => {
@@ -53,40 +45,53 @@ export default function NotificationBell() {
       "https://backend.ellinet13.com/api/notifications/stream"
     );
 
-    evtSource.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data || event.data.trim().startsWith(":")) return; // ignore keepalive pings
+
       try {
         const data = JSON.parse(event.data);
-        if (data.title && data.body) {
-          const newNotif: Notification = {
-            title: data.title,
-            body: data.body,
-            timestamp: data.timestamp ?? new Date().toISOString(),
-          };
+        if (!data.id || !data.title || !data.message) return;
 
-          setNotifications((prev) => [newNotif, ...prev]);
-          setLivePopups((prev) => [...prev, newNotif]);
-          setTimeout(() => {
-            setLivePopups((prev) =>
-              prev.filter((n) => n.timestamp !== newNotif.timestamp)
-            );
-          }, 5000);
-        }
+        const newNotif: Notification = {
+          id: data.id,
+          title: data.title,
+          message: data.message,
+          createdAt: data.createdAt ?? new Date().toISOString(),
+        };
+
+        // Add to history
+        setNotifications((prev) => [newNotif, ...prev]);
+
+        // Add live popup
+        setLivePopups((prev) => {
+          if (!prev.find((n) => n.id === newNotif.id)) {
+            setTimeout(() => {
+              setLivePopups((prev) => prev.filter((n) => n.id !== newNotif.id));
+            }, 5000);
+            return [...prev, newNotif];
+          }
+          return prev;
+        });
       } catch (e) {
         console.error("Invalid SSE data:", event.data);
       }
     };
+
+    evtSource.addEventListener("message", handleMessage);
 
     evtSource.onerror = (err) => {
       console.error("SSE connection error:", err);
       evtSource.close();
     };
 
-    return () => evtSource.close();
+    return () => {
+      evtSource.removeEventListener("message", handleMessage);
+      evtSource.close();
+    };
   }, []);
 
   return (
     <>
-      {/* Notification Bell */}
       <div style={{ position: "relative" }}>
         <Bell
           size={24}
@@ -123,9 +128,9 @@ export default function NotificationBell() {
               </div>
             ) : (
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {notifications.map((n, i) => (
+                {notifications.map((n) => (
                   <li
-                    key={`${n.timestamp}-${i}`}
+                    key={n.id}
                     style={{
                       borderBottom: "1px solid #333",
                       padding: "0.5rem 0",
@@ -135,40 +140,20 @@ export default function NotificationBell() {
                       {n.title}
                     </div>
                     <div style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                      {n.body}
+                      {n.message}
                     </div>
                     <div style={{ fontSize: "0.75rem", color: "#aaa" }}>
-                      {new Date(n.timestamp).toLocaleString()}
+                      {new Date(n.createdAt).toLocaleString()}
                     </div>
                   </li>
                 ))}
               </ul>
             )}
-
-            {/* Button to request push notification permission */}
-            {permission !== "granted" && (
-              <button
-                onClick={requestPermission}
-                style={{
-                  marginTop: "0.5rem",
-                  width: "100%",
-                  padding: "0.5rem",
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                Show push notifications out of site
-              </button>
-            )}
           </div>
         )}
       </div>
 
-      {/* Live pop-up notifications */}
+      {/* Live popups */}
       <div
         style={{
           position: "fixed",
@@ -182,7 +167,7 @@ export default function NotificationBell() {
       >
         {livePopups.map((notif) => (
           <div
-            key={notif.timestamp}
+            key={notif.id}
             style={{
               backgroundColor: "#1e1e1e",
               color: "white",
@@ -202,19 +187,17 @@ export default function NotificationBell() {
                 {notif.title}
               </div>
               <div style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                {notif.body}
+                {notif.message}
               </div>
               <div style={{ fontSize: "0.75rem", color: "#aaa" }}>
-                {new Date(notif.timestamp).toLocaleTimeString()}
+                {new Date(notif.createdAt).toLocaleTimeString()}
               </div>
             </div>
             <X
               size={16}
               style={{ cursor: "pointer", marginLeft: "0.5rem" }}
               onClick={() =>
-                setLivePopups((prev) =>
-                  prev.filter((n) => n.timestamp !== notif.timestamp)
-                )
+                setLivePopups((prev) => prev.filter((n) => n.id !== notif.id))
               }
             />
           </div>
