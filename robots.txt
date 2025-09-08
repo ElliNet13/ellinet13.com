@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://ellinet13.com/sitemap-index.xml
