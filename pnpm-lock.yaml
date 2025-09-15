@@ -14,9 +14,18 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.5.1
         version: 3.5.1
+      '@astrojs/vercel':
+        specifier: ^8.2.7
+        version: 8.2.7(astro@5.13.7(@types/node@24.5.0)(@vercel/functions@2.2.13)(jiti@2.5.1)(lightningcss@1.30.1)(rollup@4.50.2)(typescript@5.9.2))(react@19.1.1)(rollup@4.50.2)
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(vite@6.3.6(@types/node@24.5.0)(jiti@2.5.1)(lightningcss@1.30.1))
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.1.13
+      '@types/react-dom':
+        specifier: ^19.1.6
+        version: 19.1.9(@types/react@19.1.13)
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(react@19.1.1)
@@ -35,6 +44,9 @@ importers:
       node-html-parser:
         specifier: ^6.1.13
         version: 6.1.13
+      path-to-regexp:
+        specifier: '>=6.3.0'
+        version: 8.3.0
       react:
         specifier: ^19.1.0
         version: 19.1.1
@@ -44,19 +56,6 @@ importers:
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.13
-    devDependencies:
-      '@astrojs/vercel':
-        specifier: ^8.2.7
-        version: 8.2.7(astro@5.13.7(@types/node@24.5.0)(@vercel/functions@2.2.13)(jiti@2.5.1)(lightningcss@1.30.1)(rollup@4.50.2)(typescript@5.9.2))(react@19.1.1)(rollup@4.50.2)
-      '@types/react':
-        specifier: ^19.1.8
-        version: 19.1.13
-      '@types/react-dom':
-        specifier: ^19.1.6
-        version: 19.1.9(@types/react@19.1.13)
-      path-to-regexp:
-        specifier: '>=6.3.0'
-        version: 8.3.0
       vite:
         specifier: '>=6.3.6'
         version: 6.3.6(@types/node@24.5.0)(jiti@2.5.1)(lightningcss@1.30.1)
