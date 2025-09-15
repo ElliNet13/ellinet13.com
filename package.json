@@ -18,7 +18,7 @@
     "astro": "^5.13.5",
     "cheerio": "^1.1.2",
     "lucide-react": "^0.542.0",
-    "node-html-parser": "^6.1.13",
+    "node-html-parser": "^7.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.13"
