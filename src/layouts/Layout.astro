@@ -16,6 +16,8 @@ const { title } = Astro.props;
 import { Analytics } from '@vercel/analytics/react';
 import Chat from '../components/Chat.astro';
 import TopBar from '../components/TopBar.astro';
+
+import  SpeedInsights  from "@vercel/speed-insights/astro"
 ---
 
 <!doctype html>
@@ -50,7 +52,6 @@ import TopBar from '../components/TopBar.astro';
 //   });
 //
 </script>
-		<meta charSet="UTF-8" />
 		<meta name="description" content="ElliNet13.com is a site made by ElliNet13." />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
@@ -87,9 +88,11 @@ import TopBar from '../components/TopBar.astro';
 		</script>
 	</head>
 	<body>
+		<Analytics/>
+		<!-- @ts-ignore -->
+		<SpeedInsights/>
 		<TopBar />
 		<slot />
-        <Analytics/>
 		<Chat/>
 	</body>
 </html>
