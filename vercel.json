@@ -16,5 +16,8 @@
         { "key": "X-Permitted-Cross-Domain-Policies", "value": "none" }
       ]
     }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" } 
   ]
 }
