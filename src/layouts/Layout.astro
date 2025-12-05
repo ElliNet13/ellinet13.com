@@ -59,22 +59,38 @@ import  SpeedInsights  from "@vercel/speed-insights/astro"
 		<title>{title}</title>
 		<script>
 			async function subscribeToPush() {
-			  if ('serviceWorker' in navigator && 'PushManager' in window) {
-			    const registration = await navigator.serviceWorker.register('/sw.js');
+			  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+			    console.error("Push not supported");
+			    return;
+			  }
+		  
+			  try {
+			    console.log("Registering SW...");
+			    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+			    console.log("SW registration:", registration);
 			
-			    const subscription = await registration.pushManager.subscribe({
+			    // Wait until it's active
+			    const activeRegistration = await navigator.serviceWorker.ready;
+			    console.log("SW is active:", activeRegistration);
+			
+			    console.log("Subscribing to push...");
+			    const subscription = await activeRegistration.pushManager.subscribe({
 			      userVisibleOnly: true,
 			      applicationServerKey: urlBase64ToUint8Array(
 			        'BOOhQ5YW2LjBoyu1tlrY8u9DERJ_VmdD5KAtORjryp8zeMHndE2-dm42g7B5DmxexGw8s8CD6adcChBDw9VcsGE'
 			      )
 			    });
 			
-			    // Save subscription to server
+			    console.log("Subscription successful:", subscription);
+			
 			    await fetch('/api/save-subscription', {
 			      method: 'POST',
 			      body: JSON.stringify(subscription),
 			      headers: { 'Content-Type': 'application/json' }
 			    });
+			
+			  } catch (err) {
+			    console.error("Push subscription failed:", err);
 			  }
 			}
 
