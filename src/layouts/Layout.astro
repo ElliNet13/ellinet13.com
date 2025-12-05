@@ -83,7 +83,7 @@ import  SpeedInsights  from "@vercel/speed-insights/astro"
 			
 			    console.log("Subscription successful:", subscription);
 			
-			    await fetch('/api/save-subscription', {
+			    await fetch('https://backend.ellinet13.com/api/save-subscription', {
 			      method: 'POST',
 			      body: JSON.stringify(subscription),
 			      headers: { 'Content-Type': 'application/json' }
