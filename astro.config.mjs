@@ -5,21 +5,19 @@ import sitemap from '@astrojs/sitemap';
 import path from 'path';
 
 import tailwindcss from '@tailwindcss/vite';
-
-import removeComments from 'astro-remove-comments';
+import stripComments from "vite-plugin-strip-comments";
 
 export default defineConfig({
   site: 'https://ellinet13.com',
   output: 'server',       // Enable SSR build
   adapter: vercel(),      // Use Vercel Server adapter
-  integrations: [react(), sitemap(), removeComments()],
+  integrations: [react(), sitemap()],
   vite: {
     resolve: {
       alias: {
         '@': path.resolve('./src'),
       },
     },
-
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), stripComments()],
   },
 });
