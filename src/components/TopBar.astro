@@ -1,44 +1,53 @@
 ---
-import '../styles/global.css'
+import '../styles/global.css';
 import NotificationBell from './NotificationBell.jsx';
+import { Image } from '@astrojs/image/components';
+import logo from '../public/logo.png'; // Import the logo
 ---
 
 <style>
+.top-bar {
+  width: 100%;
+  height: 50px;
+  background-color: #2b2b2b;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 1px solid; /* color set below based on mode */
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
   .top-bar {
-    width: 100%;
-    height: 50px;
-    background-color: #2b2b2b;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0;
-    border: 1px solid; /* color set below based on mode */
-    box-sizing: border-box;
+    border-color: #4d4d4d;
   }
+}
 
-  @media (prefers-color-scheme: dark) {
-    .top-bar {
-      border-color: #4d4d4d;
-    }
+@media (prefers-color-scheme: light) {
+  .top-bar {
+    background-color: #e0e0e0;
+    color: black;
+    border-color: #c0c0c0;
   }
-
-  @media (prefers-color-scheme: light) {
-    .top-bar {
-      background-color: #e0e0e0;
-      color: black;
-      border-color: #c0c0c0;
-    }
-  }
+}
 </style>
 
 <div class="top-bar flex items-center p-2" view-transition-name="top-bar">
   <nav class="flex items-center w-full">
-    <img src="/logo.png" alt="Logo" width="40" height="40" />
+    <!-- Optimized logo for LCP -->
+    <Image
+      src={logo}
+      alt="Logo"
+      width={40}
+      height={40}
+    />
 
     <!-- Bell with popout -->
     <div class="ml-auto bell-container">
       <!-- @ts-ignore -->
       <NotificationBell client:load />
+    </div>
   </nav>
 </div>
