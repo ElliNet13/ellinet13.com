@@ -6,13 +6,11 @@ import path from 'path';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import image from '@astrojs/image';
-
 export default defineConfig({
   site: 'https://ellinet13.com',
   output: 'server',       // Enable SSR build
   adapter: vercel(),      // Use Vercel Server adapter
-  integrations: [react(), sitemap(), image()],
+  integrations: [react(), sitemap()],
   vite: {
     resolve: {
       alias: {
