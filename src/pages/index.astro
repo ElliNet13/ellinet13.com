@@ -35,34 +35,39 @@ import Card from '../components/Card.astro';
 			</defs>
 		</svg>
 		<!-- @ts-ignore -->
-		<h1>
-		  Welcome to 
-		  <svg
-		    xmlns="http://www.w3.org/2000/svg"
-		    width="100%"
-		    height="1em"
-		    viewBox="0 0 500 60"
-		    style="vertical-align: middle;"
-		    aria-hidden="true"
-		  >
-		    <defs>
-		      <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-		        <stop offset="0%" stop-color="#ff0000" stop-opacity="1"/>
-		        <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
-		      </linearGradient>
-		    </defs>
-		    <text
-		      x="0"
-		      y="45"
-		      font-size="48"
-		      font-weight="700"
-		      font-family="Arial, sans-serif"
-		      fill="url(#textGrad)"
-		    >
-		      ElliNet13.com
-		    </text>
-		  </svg>
-		</h1>
+<h1 style="text-align: center; line-height: 0.4;">
+  Welcome to
+  <br />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="100%"
+    height="5rem"
+    viewBox="0 0 600 60"
+    style="display: inline-block;"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ff0000"/>
+        <stop offset="100%" stop-color="#ffffff"/>
+      </linearGradient>
+    </defs>
+    <text
+      x="50%"
+      y="48"
+      font-size="48"
+      font-weight="700"
+      font-family="Arial, sans-serif"
+      fill="url(#textGrad)"
+      text-anchor="middle"
+      dominant-baseline="middle"
+    >
+      ElliNet13.com
+    </text>
+  </svg>
+</h1>
+
+
 		<!-- @ts-ignore -->
 		<ul role="list" class="link-card-grid">
 			<Card
