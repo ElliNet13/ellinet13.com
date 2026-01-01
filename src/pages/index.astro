@@ -162,11 +162,14 @@ import Card from '../components/Card.astro';
 		margin-bottom: 1em;
 	}
 	.text-gradient {
-		background-image: var(--accent-gradient);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-size: 400%;
-		background-position: 0%;
+	  background-image: var(--accent-gradient);
+	  background-size: 200% auto;
+	  background-clip: text;
+	  -webkit-background-clip: text;
+	  color: var(--fallback-color, white); /* Have a fallback paint */
+	  -webkit-text-fill-color: transparent;
+	  /* Attempt to force GPU compositing to speed up painting */
+	  transform: translateZ(0);
 	}
 	.link-card-grid {
 		display: grid;
