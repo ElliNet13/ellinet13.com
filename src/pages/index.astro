@@ -35,7 +35,34 @@ import Card from '../components/Card.astro';
 			</defs>
 		</svg>
 		<!-- @ts-ignore -->
-		<h1>Welcome to <span class="text-gradient">ElliNet13.com</span></h1>
+		<h1>
+		  Welcome to 
+		  <svg
+		    xmlns="http://www.w3.org/2000/svg"
+		    width="100%"
+		    height="1em"
+		    viewBox="0 0 500 60"
+		    style="vertical-align: middle;"
+		    aria-hidden="true"
+		  >
+		    <defs>
+		      <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+		        <stop offset="0%" stop-color="#ff0000" stop-opacity="1"/>
+		        <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+		      </linearGradient>
+		    </defs>
+		    <text
+		      x="0"
+		      y="45"
+		      font-size="48"
+		      font-weight="700"
+		      font-family="Arial, sans-serif"
+		      fill="url(#textGrad)"
+		    >
+		      ElliNet13.com
+		    </text>
+		  </svg>
+		</h1>
 		<!-- @ts-ignore -->
 		<ul role="list" class="link-card-grid">
 			<Card
@@ -160,16 +187,6 @@ import Card from '../components/Card.astro';
 		line-height: 1;
 		text-align: center;
 		margin-bottom: 1em;
-	}
-	.text-gradient {
-	  background-image: var(--accent-gradient);
-	  background-size: 200% auto;
-	  background-clip: text;
-	  -webkit-background-clip: text;
-	  color: var(--fallback-color, white); /* Have a fallback paint */
-	  -webkit-text-fill-color: transparent;
-	  /* Attempt to force GPU compositing to speed up painting */
-	  transform: translateZ(0);
 	}
 	.link-card-grid {
 		display: grid;
