@@ -6,11 +6,13 @@ import path from 'path';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import removeComments from 'astro-remove-comments';
+
 export default defineConfig({
   site: 'https://ellinet13.com',
   output: 'server',       // Enable SSR build
   adapter: vercel(),      // Use Vercel Server adapter
-  integrations: [react(), sitemap()],
+  integrations: [react(), sitemap(), removeComments()],
   vite: {
     resolve: {
       alias: {

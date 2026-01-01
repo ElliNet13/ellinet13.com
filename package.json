@@ -19,6 +19,7 @@
     "@vercel/analytics": "^1.6.1",
     "@vercel/speed-insights": "^1.3.1",
     "astro": "^5.16.6",
+    "astro-remove-comments": "^0.0.1",
     "cheerio": "^1.1.2",
     "devalue": "^5.6.1",
     "lucide-react": "^0.548.0",
