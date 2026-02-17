@@ -21,7 +21,7 @@
     "astro": "^5.16.6",
     "cheerio": "^1.1.2",
     "devalue": "^5.6.1",
-    "lucide-react": "^0.564.0",
+    "lucide-react": "^0.567.0",
     "node-html-parser": "^6.1.13",
     "path-to-regexp": "8.3.0",
     "react": "^19.2.3",
