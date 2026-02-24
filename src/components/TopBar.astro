@@ -1,8 +1,6 @@
 ---
 import '../styles/global.css';
 import NotificationBell from './NotificationBell.jsx';
-import { Image } from 'astro:assets';
-import logo from '../assets/logo.png'; // Import the logo
 ---
 
 <style>
@@ -36,13 +34,7 @@ import logo from '../assets/logo.png'; // Import the logo
 
 <div class="top-bar flex items-center p-2" view-transition-name="top-bar">
   <nav class="flex items-center w-full">
-    <!-- Optimized logo for LCP -->
-    <Image
-      src={logo}
-      alt="Logo"
-      width={40}
-      height={40}
-    />
+    <img src="/logo.png" alt="Logo" width="40" height="40" />
 
     <!-- Bell with popout -->
     <div class="ml-auto bell-container">
