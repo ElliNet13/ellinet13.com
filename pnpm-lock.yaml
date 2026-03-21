@@ -65,7 +65,7 @@ importers:
     devDependencies:
       baseline-browser-mapping:
         specifier: ^2.9.11
-        version: 2.10.9
+        version: 2.10.10
       vite-plugin-strip-comments:
         specifier: ^0.0.9
         version: 0.0.9
@@ -1325,8 +1325,8 @@ packages:
   base-64@1.0.0:
     resolution: {integrity: sha512-kwDPIFCGx0NZHog36dj+tHiwP4QMzsZ3AgMViUBKI0+V5n4U0ufTCUMhnQ04diaRI8EX/QcPfql7zlhZ7j4zgg==}
 
-  baseline-browser-mapping@2.10.9:
-    resolution: {integrity: sha512-OZd0e2mU11ClX8+IdXe3r0dbqMEznRiT4TfbhYIbcRPZkqJ7Qwer8ij3GZAmLsRKa+II9V1v5czCkvmHH3XZBg==}
+  baseline-browser-mapping@2.10.10:
+    resolution: {integrity: sha512-sUoJ3IMxx4AyRqO4MLeHlnGDkyXRoUG0/AI9fjK+vS72ekpV0yWVY7O0BVjmBcRtkNcsAO2QDZ4tdKKGoI6YaQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3756,7 +3756,7 @@ snapshots:
 
   base-64@1.0.0: {}
 
-  baseline-browser-mapping@2.10.9: {}
+  baseline-browser-mapping@2.10.10: {}
 
   bindings@1.5.0:
     dependencies:
@@ -3781,7 +3781,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.10.9
+      baseline-browser-mapping: 2.10.10
       caniuse-lite: 1.0.30001762
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
