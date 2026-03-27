@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "baseline-browser-mapping": "^2.10.11",
-    "vite-plugin-strip-comments": "^0.0.9"
+    "vite-plugin-strip-comments": "^0.0.10"
   }
 }
