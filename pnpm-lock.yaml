@@ -65,7 +65,7 @@ importers:
     devDependencies:
       baseline-browser-mapping:
         specifier: ^2.10.11
-        version: 2.10.33
+        version: 2.10.34
       vite-plugin-strip-comments:
         specifier: ^0.0.10
         version: 0.0.10
@@ -1149,6 +1149,11 @@ packages:
 
   baseline-browser-mapping@2.10.33:
     resolution: {integrity: sha512-bA6+tcSLpz2tIEdDXZPpPTIuxBcC4+w6SieaYyfigIa4h8GlFxbA17v22Vx3JUtuZQj9SgOsnbK+aTBzyDyEuw==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  baseline-browser-mapping@2.10.34:
+    resolution: {integrity: sha512-IMDedajPifLnHNY0X9n8hKxRTQ6/eTHwr5bDo04WnuqxyKw6LYtQywCuuqPZwhl3aBXMvQpJov42GLCwRRdQzw==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3332,6 +3337,8 @@ snapshots:
   balanced-match@4.0.4: {}
 
   baseline-browser-mapping@2.10.33: {}
+
+  baseline-browser-mapping@2.10.34: {}
 
   bindings@1.5.0:
     dependencies:
