@@ -20,7 +20,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "astro": "^7.0.0",
     "cheerio": "^1.2.0",
-    "devalue": "^5.6.4",
+    "devalue": "^5.8.1",
     "lucide-react": "^1.0.0",
     "node-html-parser": "^8.0.0",
     "path-to-regexp": "8.4.2",
